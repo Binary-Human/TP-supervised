@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split, cross_val_predict, cross_v
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, classification_report, ConfusionMatrixDisplay
 
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, GradientBoostingClassifier
 
 class DecisionTreePipeline:
     def __init__(self, model_type, test_size=0.3, random_state=42):
@@ -103,7 +103,7 @@ class DecisionTreePipeline:
         disp.plot()
         plt.show()
 
-pipeline = DecisionTreePipeline(model_type= RandomForestClassifier)
+pipeline = DecisionTreePipeline(model_type= GradientBoostingClassifier)
 
 pipeline.load_data(
     "2-Dataset/alt_acsincome_ca_features_85.csv",
