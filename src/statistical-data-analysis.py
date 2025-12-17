@@ -18,9 +18,9 @@ import pandas as pd
 import numpy as np
 
 class DataVisualizer:
-    def __init__(self, csv_path):
-        self.csv_path = csv_path
-        self.df = pd.read_csv(csv_path)
+    def __init__(self, features_path):
+        self.features_path = features_path
+        self.df = pd.read_csv(features_path)
     
     def premilinary_analysis(self):
         print("Dataframe Info:")
@@ -30,8 +30,7 @@ class DataVisualizer:
         print("\nBasic Statistics:")
         print(self.df.describe(include='all'))
 
-    def visualize_parameter(self, parameter):
-        """Plot the histogram of a single column."""
+    def visualize_one_parameter(self, parameter):
         if parameter not in self.df.columns:
             raise ValueError(f"Column '{parameter}' not found in dataframe.")
 
@@ -44,7 +43,7 @@ class DataVisualizer:
 
     def visualize_all(self):
         for col in self.df.columns:
-            self.visualize_parameter(col)
+            self.visualize_one_parameter(col)
 
     def visualize_correlation(self):
         corr = self.df.corr()
@@ -84,6 +83,6 @@ viz = DataVisualizer("2-Dataset/alt_acsincome_ca_features_85.csv")
 
 viz.premilinary_analysis()
 # viz.visualize_all()
-# viz.visualize_parameter("AGEP")
+# viz.visualize_one_parameter("AGEP")
 # viz.visualize_correlation()
 # viz.top_global_correlations(10)
