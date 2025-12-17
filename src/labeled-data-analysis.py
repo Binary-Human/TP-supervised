@@ -7,20 +7,20 @@ import pandas as pd
 import numpy as np
 
 class LabeledDataVisualizer:
-    def __init__(self, csv_path, label_path=None, label_colname=None):
-        self.csv_path = csv_path
-        self.df = pd.read_csv(csv_path)
-        self.label_df = None
-        if label_path and label_colname:
-            self.label_df = pd.read_csv(label_path)
-            self.label = self.label_df[label_colname]
 
-            self.df_labeled = pd.concat([self.df.reset_index(drop=True), pd.Series(self.label).reset_index(drop=True)], axis=1)
-            self.df_labeled[label_colname] = pd.to_numeric(self.df_labeled[label_colname], errors="coerce")
+    def __init__(self, features_path, labels_path, label_colname):
+        df = pd.read_csv(features_path)
+        labels = pd.read_csv(labels_path)[label_colname]
 
-        else:
-            self.label = None
-            self.df_labeled = None
+        self.df_labeled = pd.concat(
+            [df.reset_index(drop=True), labels.reset_index(drop=True)],
+            axis=1
+        )
+
+        self.df_labeled[label_colname] = pd.to_numeric(
+            self.df_labeled[label_colname], errors="coerce"
+        )
+
 
     def feature_label_stats(self):
         # TODO : keep non numeric processing given Pearson only works on numeric ?
@@ -51,5 +51,5 @@ class LabeledDataVisualizer:
 
         return pd.Series(res).sort_values(key=abs, ascending=False)
 
-viz = LabeledDataVisualizer("2-Dataset/alt_acsincome_ca_features_85.csv", label_path="2-Dataset/alt_acsincome_ca_labels_85.csv", label_colname="PINCP")
+viz = LabeledDataVisualizer("2-Dataset/alt_acsincome_ca_features_85.csv", labels_path="2-Dataset/alt_acsincome_ca_labels_85.csv", label_colname="PINCP")
 viz.feature_label_stats()
