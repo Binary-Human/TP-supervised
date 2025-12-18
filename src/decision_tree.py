@@ -12,7 +12,7 @@ from sklearn.utils import resample
 import joblib
 
 class DecisionTreePipeline:
-    def __init__(self, model, model_type = RandomForestClassifier, test_size=0.3, random_state=42):
+    def __init__(self, model, model_type = GradientBoostingClassifier, test_size=0.3, random_state=42):
         self.test_size = test_size
         self.random_state = random_state
         self.model_type = model_type
@@ -78,7 +78,7 @@ class DecisionTreePipeline:
 
         print("\n----------- Model Evaluation -----------\n")
         print(f"Train time       : {self.train_time:.3f}s")
-        print(f"Predict time       : {self.predict_time:.3f}s")
+        print(f"Predict time     : {self.predict_time:.3f}s")
         print(f"Accuracy         : {accuracy:.4f}")
         print(f"Precision        : {precision:.4f}")
         print(f"Recall           : {recall:.4f}")
@@ -155,7 +155,7 @@ class DecisionTreePipeline:
 
         joblib.dump(grid_search.best_estimator_,'BestModel_XXXX.joblib')
 
-pipeline = DecisionTreePipeline(model=RandomForestClassifier())
+pipeline = DecisionTreePipeline(model=GradientBoostingClassifier())
 
 pipeline.load_data(
     "2-Dataset/alt_acsincome_ca_features_85.csv",
@@ -186,7 +186,6 @@ param_grid_rf = {
 param_grid_adaB =  {
     "n_estimators": [50, 100, 200],
     "learning_rate": [0.01, 0.1, 1],
-    "algorithm": ["SAMME", "SAMME.R"]
 }
 
 param_grid_gBoost = {
@@ -197,4 +196,4 @@ param_grid_gBoost = {
     
 }
 
-pipeline.grid_search_impl(param_grid_rf)
+# pipeline.grid_search_impl(param_grid_gBoost)
