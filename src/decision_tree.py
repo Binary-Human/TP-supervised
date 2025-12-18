@@ -9,10 +9,13 @@ from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, r
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, GradientBoostingClassifier
 
 class DecisionTreePipeline:
-    def __init__(self, model_type, test_size=0.3, random_state=42):
+    def __init__(self, model, model_type = RandomForestClassifier, test_size=0.3, random_state=42):
         self.test_size = test_size
         self.random_state = random_state
-        self.model = model_type(random_state=random_state)
+        self.model_type = model_type
+        self.model = model
+        self.train_time = None
+        self.predict_time = None
 
     def load_data(self, features_path, labels_path):
         self.features = pd.read_csv(features_path)
@@ -59,16 +62,20 @@ class DecisionTreePipeline:
         self.train_time = time.time() - start
         return self.model
     
-    def evaluate(self):
-        labels_pred = self.model.predict(self.features_test)
+    def evaluate(self, x, y ):
+        start = time.time()
+        labels_pred = self.model.predict(x)
+        self.predict_time = time.time() - start
 
-        accuracy = accuracy_score(self.labels_test, labels_pred)
-        precision = precision_score(self.labels_test, labels_pred)
-        recall = recall_score(self.labels_test, labels_pred)
-        cm = confusion_matrix(self.labels_test, labels_pred)
+
+        accuracy = accuracy_score(y, labels_pred)
+        precision = precision_score(y, labels_pred)
+        recall = recall_score(y, labels_pred)
+        cm = confusion_matrix(y, labels_pred)
 
         print("\n----------- Model Evaluation -----------\n")
         print(f"Train time       : {self.train_time:.3f}s")
+        print(f"Predict time       : {self.predict_time:.3f}s")
         print(f"Accuracy         : {accuracy:.4f}")
         print(f"Precision        : {precision:.4f}")
         print(f"Recall           : {recall:.4f}")
@@ -80,6 +87,7 @@ class DecisionTreePipeline:
         plt.show()
 
     def cross_validation(self, cv=5):
+
         labels_pred = cross_val_predict(self.model, self.features_test, self.labels_test, cv=cv)
 
         accuracy = cross_val_score(self.model, self.features_test, self.labels_test, cv=cv, scoring="accuracy")
@@ -103,7 +111,7 @@ class DecisionTreePipeline:
         disp.plot()
         plt.show()
 
-pipeline = DecisionTreePipeline(model_type= GradientBoostingClassifier)
+pipeline = DecisionTreePipeline(model=RandomForestClassifier())
 
 pipeline.load_data(
     "2-Dataset/alt_acsincome_ca_features_85.csv",
@@ -113,8 +121,11 @@ pipeline.load_data(
 pipeline.split_data()
 pipeline.scale_column("AGEP", scaler_type="standard")
 pipeline.scale_column("WKHP", scaler_type="minmax")
+
 pipeline.train()
 
-pipeline.evaluate()
+print("\n--- Train set evaluation ---\n")
+pipeline.evaluate(pipeline.features_train, pipeline.labels_train)
+print("\n--- Test set evaluation ---\n")
+pipeline.evaluate(pipeline.features_test, pipeline.labels_test)
 pipeline.cross_validation()
-
