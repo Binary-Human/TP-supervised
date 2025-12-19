@@ -54,17 +54,10 @@ Les features où la correlation avec labels est très proche de 0. On fait le ch
 -  COW: corr with label = 0.0526
 -  POBP: corr with label = -0.0864
 
-Features numériques:
-  AGEP : Allure gaussienne - StandardScaling
-  WKHP : Non gaussinne - MinMaxScaling
+Features numériques: (Par soucis de método, les arbres de décision fonctionnent par seuil donc pas nécessaire)
+- AGEP : Allure gaussienne - StandardScaling
+- WKHP : Non gaussinne - MinMaxScaling
 
-Catégorie nominal:
-  SEX
-  COW
-  MAR
-  POBP
-  RAC1P
-  RELP
 
 ## Expérimentation 1 : Comparaison de modèles par défaut
 
@@ -407,7 +400,7 @@ Il offre le meilleur compromis entre légèreté d'execution et capcité de gén
  
 * Résultats obtenus : 
 
-![alt text](image.png)
+![alt text](img/permutation_importance.png)
 
 * Principe de notre implémentation :
 
@@ -496,17 +489,17 @@ LIME met en évidence des règles locales cohérentes. Les décision sont domin�
 
 Les variables dominantes sont similaires à LIME : OCCP, WKHP, SCHL, RELP, AGEP
 
-![alt text](image-2.png)
+![alt text](img/WaterFall1.png)
 
 Dans notre échantillons on a un exemple négatif où l'occupation a une forte contribution négative sur le résultat. RELP, WKHP et AGEP qui sont élevées pousse une contribution positive mais qui est moindre comparée à OCCP.
 
 
-![alt text](image-3.png)
+![alt text](img/WaterFall2.png)
 
 Un autre exemple positif est marquée par une contribution positive de presque tous ses features (à valeur élevées) sauf SCHL qui est bas.
 
 
-![alt text](image-4.png)
+![alt text](img/WaterFall3.png)
 
 Une exemple négatif y ressemble. Les contribution négatives de AGEP, RELP, WKHP, qui ont des valeurs bassent, se valent presque.
 
@@ -519,7 +512,7 @@ LIME est plus pertinent pour une compréhension rapide et locale des décisions,
 
 * Analyse summary-plot de SHAP
 
-![alt text](image-5.png)
+![alt text](img/summary_plot.png)
 
 Features dominantes :
 WKHP
@@ -545,5 +538,46 @@ Certaines features peuvent donc être trompeuses. WKHP a un très gros effet sur
 Cela peut conduire à des faux négatifs et faux positifs selon les échantillons spécifiques. 
 
 ## Explicabilité : contrefactuelle
-Résultats / Commentaires / Analyses : 
 
+On va cherche à inverser l'impact des feature qui influencent le plus la prédiction. 
+
+![alt text](img/sample1.png)
+
+On a comme valeur de départ :
+
+```
+AGEP,COW,SCHL,MAR,OCCP,POBP,RELP,WKHP,SEX,RAC1P
+18.0,1.0,16.0,5.0,310.0,6.0,2.0,35.0,2.0,1.0
+
+```
+
+On va chercher un inverser l'impact de AGEP, RELP et WKHP, pour que leur contribution soit positive.
+
+On constate dans les explications LIME :
+
+```
+WKHP <= 0.15: -0.1036
+0.15 < WKHP <= 0.52: 0.0451
+
+AGEP <= -0.65: -0.0407
+AGEP > 0.27: 0.0280
+
+RELP > 1.00: -0.0342
+RELP <= 0.00: 0.0160
+
+```
+
+On modifie les valeurs des features (en s'aidant d'autres entries de notre dataset qui valident les conditions pour une contribution positive).
+On teste avec les valeurs :
+
+AGEP = 30, RELP = 0.0,WKHP = 50.0
+
+```
+AGEP,COW,SCHL,MAR,OCCP,POBP,RELP,WKHP,SEX,RAC1P
+30.0,1.0,16.0,5.0,310.0,6.0,0.0,50.0,2.0,1.0
+
+```
+
+![alt text](img/sample1_tweaked.png)
+
+On bien réussi à inverser la prédiction.
