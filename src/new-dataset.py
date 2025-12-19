@@ -8,7 +8,7 @@ import joblib
 
 from decision_tree import DecisionTreePipeline
 
-model_path = "Random_Forest_BestModel_XXXX.joblib"
+model_path = "models/Random_Forest_BestModel_XXX1.joblib"
 model = joblib.load(model_path)
 
 pipeline = DecisionTreePipeline(model)

@@ -21,9 +21,7 @@ class LabeledDataVisualizer:
             self.df_labeled[label_colname], errors="coerce"
         )
 
-
     def feature_label_stats(self):
-        # TODO : keep non numeric processing given Pearson only works on numeric ?
         """Affiche corr (Pearson) avec label et boxplots"""
 
         if self.df_labeled is None:
@@ -51,5 +49,5 @@ class LabeledDataVisualizer:
 
         return pd.Series(res).sort_values(key=abs, ascending=False)
 
-viz = LabeledDataVisualizer("2-Dataset/alt_acsincome_ca_features_85.csv", labels_path="2-Dataset/alt_acsincome_ca_labels_85.csv", label_colname="PINCP")
+viz = LabeledDataVisualizer("4-Complementary data/Complementary data/acsincome_co_allfeatures.csv", labels_path="2-Dataset/alt_acsincome_ca_labels_85.csv", label_colname="PINCP")
 viz.feature_label_stats()
