@@ -35,21 +35,31 @@ def permutation_feature_importance(model, x, y, n=10, random_state=42):
     plt.show()
     return importance_df
 
-model_path = "AdaBoost_BestModel_XXXX.joblib"
+model_path = "models/AdaBoost_BestModel_XXX1.joblib"
 model = joblib.load(model_path)
 
 pipeline = DecisionTreePipeline(model)
+
+# Delete this if testing example contrefactuels
 pipeline.load_data(
     "2-Dataset/alt_acsincome_ca_features_85.csv",
     "2-Dataset/alt_acsincome_ca_labels_85.csv",
 )
 pipeline.split_data()
+
+"""
+# For testing example contrefactuels only
+pipeline.features_train = pd.read_csv("feature.csv")
+pipeline.labels_train = pd.read_csv("label.csv")
+
+pipeline.features_test = pd.read_csv("features_test.csv")
+pipeline.labels_test = pd.read_csv("labels_test.csv")
+"""
+
 pipeline.scale_column("AGEP", scaler_type="standard")
 pipeline.scale_column("WKHP", scaler_type="minmax")
 
-
 importance_df = permutation_feature_importance(pipeline.model, pipeline.features_test, pipeline.labels_test, n=10)
-
 
 labels_pred = model.predict(pipeline.features_test)
 y_true = pipeline.labels_test.values.ravel()
@@ -60,11 +70,12 @@ y_pred = labels_pred
 
 explainer_lime = lime.lime_tabular.LimeTabularExplainer(
     training_data=pipeline.features_train.values,
-    feature_names=pipeline.features.columns.tolist(),
+    feature_names=pipeline.features_train.columns.tolist(),
     class_names=["False", "True"],
     mode="classification"
 )
 
+# sample_idx = range(len(pipeline.features_test))
 sample_idx = np.random.choice(len(pipeline.features_test), 3, replace=False)
 
 print("----- LIME explanations -----")
@@ -75,12 +86,13 @@ for idx in sample_idx:
         num_features=10
     )
     print(f"\nSample #{idx}:")
+    print(f"Features : {pipeline.features_test.iloc[idx].to_dict()}")
     for feature, weight in exp.as_list():
         print(f"{feature}: {weight:.4f}")
 
 # SHAP
 
-sample_idx = np.random.choice(len(pipeline.features_test), 5, replace=False)
+sample_idx = np.random.choice(len(pipeline.features_test), 3, replace=False)
 X_sample = pipeline.features_test.iloc[sample_idx]
 
 n_samples, n_features = X_sample.shape
@@ -111,7 +123,7 @@ for i, idx in enumerate(sample_idx):
             values=shap_values_total[i],
             base_values=0,
             data=X_sample.iloc[i].values,
-            feature_names=pipeline.features.columns.tolist()
+            feature_names=pipeline.features_train.columns.tolist()
         )
     )
 
@@ -119,7 +131,7 @@ print("\n----- SHAP Summary Plot Global -----")
 shap.summary_plot(
     shap_values_total,
     X_sample,
-    feature_names=pipeline.features.columns
+    feature_names=pipeline.features_train.columns
 )
 
 # POur les sous-groupe
@@ -157,4 +169,4 @@ for name, idx_group in groups.items():
         shap_group += weight * contrib
 
     print(f"\nSHAP Summary Plot – {name}")
-    shap.summary_plot(shap_group, X_group, feature_names=pipeline.features.columns)
+    shap.summary_plot(shap_group, X_group, feature_names=pipeline.features_train.columns)
